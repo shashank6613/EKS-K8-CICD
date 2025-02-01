@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     // Build Docker image
-                    sh "docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}", ".")
+                    docker.build("${DOCKER_IMAGE_NAME}:latest")
 "
                 }
             }
