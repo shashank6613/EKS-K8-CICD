@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     // Build Docker image
-                    sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_ID} ."
+                    sh "docker buildx build -t ${DOCKER_IMAGE}:${env.BUILD_ID} ."
                 }
             }
         }
