@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: your-app-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: prt-app
+  template:
+    metadata:
+      labels:
+        app: prt-app
+    spec:
+      containers:
+        - name: prt-app
+          image: "docker.io/shashank6613/prt-image:latest"
+          ports:
+            - containerPort: 8080
+
