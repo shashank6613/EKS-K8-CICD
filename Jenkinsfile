@@ -22,7 +22,8 @@ pipeline {
             steps {
                 script {
                     // Build Docker image
-                    sh "docker.build("${DOCKER_IMAGE}:${env.BUILD_ID} ."
+                    sh "docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}", ".")
+"
                 }
             }
         }
