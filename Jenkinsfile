@@ -54,7 +54,7 @@ pipeline {
                         
                         // Optionally, you can update the image of your deployment using kubectl
                         // Update the deployment with the latest image tag
-                        sh "kubectl set image deployment/my-app-deployment my-app=${DOCKER_REGISTRY}/${DOCKER_REPO}:${buildTag}"
+                        sh "kubectl set image deployment/my-app-deployment prt-app=${DOCKER_REGISTRY}/${DOCKER_REPO}:${buildTag}"
                         
                         // Apply the service if necessary
                         sh "kubectl apply -f service.yaml"
