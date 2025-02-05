@@ -20,7 +20,7 @@ pipeline {
                     // Use Jenkins' build ID to tag the Docker image
                     def buildTag = "${env.BUILD_ID}"
                     // Build the Docker image and tag it with the build ID
-                    sh "docker buildx build -t ${DOCKER_REGISTRY}/${DOCKER_REPO}:${buildTag} ."
+                    sh "docker buildx build --tag ${DOCKER_REGISTRY}/${DOCKER_REPO}:${buildTag} ."
                 }
             }
         }
