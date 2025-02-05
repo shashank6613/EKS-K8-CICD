@@ -1,77 +1,86 @@
 pipeline {
-    agent any
-
+    agent { label 'mini' }
     environment {
-        DOCKER_REGISTRY = "docker.io"
-        DOCKER_IMAGE = "shashank6613/prt-image"
-        K8S_DEPLOYMENT_FILE = "deployment.yaml"
-        K8S_SERVICE_FILE = "service.yaml"
-        DOCKERHUB_CREDENTIALS = "dock-creds" // Set your Jenkins DockerHub credentials ID
-        K8S_CREDENTIALS = "k8-creds" // Set your Jenkins Kubernetes credentials ID
-        IMAGE_TAG = "${env.BUILD_ID}"
+        // Set environment variables for Docker registry, image name, etc.
+        DOCKER_IMAGE = 'my-app'  // Change to your Docker image name
+        DOCKER_REGISTRY = 'docker.io'  // Replace with your Docker registry
     }
-
     stages {
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
+                // Checkout the code from your Git repository
                 checkout scm
             }
         }
-
+        
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image
-                    docker.build("${DOCKER_IMAGE_NAME}:latest")
+                    // Use Jenkins' build ID to tag the Docker image
+                    def buildTag = "${env.BUILD_ID}"
+                    // Build the Docker image and tag it with the build ID
+                    sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${buildTag} ."
                 }
             }
         }
-
-        stage('Login to DockerHub') {
+        
+        stage('Push Docker Image') {
             steps {
                 script {
-                    // Login to DockerHub
-                    withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    // Use credentials to log in to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        // Log in to Docker Hub before pushing the image
+                        sh "echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin"
+
+                        // Push the Docker image to the registry with the build ID tag
+                        def buildTag = "${env.BUILD_ID}"
+                        sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${buildTag}"
                     }
                 }
             }
         }
-
-        stage('Push Docker Image to DockerHub') {
+        
+        stage('Deploy to Minikube') {
             steps {
-                script {
-                    // Push Docker image to DockerHub
-                    sh "docker push ${DOCKER_IMAGE}:${env.BUILD_ID}"
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    // Deploy using kubectl
-                    withCredentials([file(credentialsId: K8S_CREDENTIALS, variable: 'KUBE_CONFIG')]) {
-                        // Update the Kubernetes deployment and service files
-                        def buildId = env.BUILD_ID
-                        sh """
-                            kubectl --kubeconfig=\$KUBE_CONFIG set image deployment/prt-app prt-app=${DOCKER_IMAGE}:${buildId} --record
-                            kubectl --kubeconfig=\$KUBE_CONFIG apply -f ${K8S_DEPLOYMENT_FILE}
-                            kubectl --kubeconfig=\$KUBE_CONFIG apply -f ${K8S_SERVICE_FILE}
-                        """
+                // Using withCredentials block to securely bind the kubeconfig file
+                withCredentials([file(credentialsId: 'minikube-kubeconfig', variable: 'KUBECONFIG')]) {
+                    script {
+                        // Set up the Docker image with the build ID tag for deployment
+                        def buildTag = "${env.BUILD_ID}"
+                        
+                        // Apply the Kubernetes deployment (make sure you have the correct YAML files)
+                        sh "kubectl apply -f deployment.yaml"
+                        
+                        // Optionally, you can update the image of your deployment using kubectl
+                        // Update the deployment with the latest image tag
+                        sh "kubectl set image deployment/my-app-deployment my-app=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${buildTag}"
+                        
+                        // Apply the service if necessary
+                        sh "kubectl apply -f service.yaml"
                     }
                 }
             }
         }
     }
-
     post {
         success {
-            echo "Deployment completed successfully!"
+            echo "Build and deployment successful"
         }
-
         failure {
-            echo "Build or deployment failed. Please check the logs."
+            echo "Build or deployment failed. Cleaning up Docker images and containers."
+            
+            // Clean up Docker images and containers left running after a failed deployment
+            script {
+                // Find and stop any running containers (replace 'my-app' with your container name if needed)
+                sh 'docker ps -q --filter "ancestor=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}" | xargs -r docker stop'
+
+                // Remove any containers that were running from this build
+                sh 'docker ps -a -q --filter "ancestor=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}" | xargs -r docker rm'
+
+                // Remove the Docker image if it exists
+                sh 'docker images -q ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID} | xargs -r docker rmi'
+            }
         }
     }
 }
+
