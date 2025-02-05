@@ -2,7 +2,7 @@ pipeline {
     agent { label 'mini' }
     environment {
         // Set environment variables for Docker registry, image name, etc.
-        DOCKER_IMAGE = 'my-app'  // Change to your Docker image name
+        DOCKER_IMAGE = 'prt-app'  // Change to your Docker image name
         DOCKER_REGISTRY = 'docker.io'  // Replace with your Docker registry
     }
     stages {
