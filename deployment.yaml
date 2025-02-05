@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: prt-app
-          image: "docker.io/shashank6613/prt-image:latest"
+          image: "docker.io/shashank6613/prt-app:latest"
           ports:
             - containerPort: 8080
 
