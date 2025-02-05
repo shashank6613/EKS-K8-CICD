@@ -41,23 +41,26 @@ pipeline {
             }
         }
         
-        stage('Deploy to Minikube') {
+        stage('Deploy to Local Kubernetes') {
             steps {
-                // Using withCredentials block to securely bind the kubeconfig file
-                withCredentials([file(credentialsId: 'minikube-kubeconfig', variable: 'KUBECONFIG')]) {
+                        // Using withCredentials block to securely bind the kubeconfig file (if required)
+                withCredentials([file(credentialsId: 'local-kubeconfig', variable: 'KUBECONFIG')]) {
                     script {
                         // Set up the Docker image with the build ID tag for deployment
                         def buildTag = "${env.BUILD_ID}"
-                        
+                
                         // Apply the Kubernetes deployment (make sure you have the correct YAML files)
                         sh "kubectl apply -f deployment.yaml"
-                        
+                
                         // Optionally, you can update the image of your deployment using kubectl
                         // Update the deployment with the latest image tag
                         sh "kubectl set image deployment/my-app-deployment prt-app=${DOCKER_REGISTRY}/${DOCKER_REPO}:${buildTag}"
-                        
+                
                         // Apply the service if necessary
                         sh "kubectl apply -f service.yaml"
+                
+                        // Optional: You can check if the deployment is successful
+                        sh "kubectl rollout status deployment/my-app-deployment"
                     }
                 }
             }
