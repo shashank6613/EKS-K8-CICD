@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'mini' }
+    agent any
     environment {
         // Set environment variables for Docker registry, image name, etc.
         DOCKER_IMAGE = 'prt-app'  // Change to your Docker image name
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 script {
                     // Use credentials to log in to Docker Hub
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    withCredentials([usernamePassword(credentialsId: 'dock-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         // Log in to Docker Hub before pushing the image
                         sh "echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin"
 
