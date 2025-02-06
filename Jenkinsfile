@@ -5,6 +5,7 @@ pipeline {
             DOCKER_IMAGE = 'prt-app'  // Change to your Docker image name
             DOCKER_REGISTRY = 'docker.io'  // Replace with your Docker registry
             DOCKER_REPO = 'shashank9928/prt-app'
+            KUBECONFIG = 'local-kubeconfig'
         }
         stages {
             stage('Checkout') {
@@ -64,11 +65,11 @@ pipeline {
             
             script {
                 
-                sh 'docker ps -q --filter "ancestor=${DOCKER_REGISTRY}/${DOCKER_REPO}:${env.BUILD_ID}" | xargs -r docker stop'
+                sh "docker ps -q --filter \"ancestor=${DOCKER_REGISTRY}/${DOCKER_REPO}:${env.BUILD_ID}\" | xargs -r docker stop"
 
-                sh 'docker ps -a -q --filter "ancestor=${DOCKER_REGISTRY}/${DOCKER_REPO}:${env.BUILD_ID}" | xargs -r docker rm'
+                sh "docker ps -a -q --filter \"ancestor=${DOCKER_REGISTRY}/${DOCKER_REPO}:${env.BUILD_ID}\" | xargs -r docker rm"
 
-                sh 'docker images -q ${DOCKER_REGISTRY}/${DOCKER_REPO}:${env.BUILD_ID} | xargs -r docker rmi'
+                sh "docker images -q ${DOCKER_REGISTRY}/${DOCKER_REPO}:${env.BUILD_ID} | xargs -r docker rmi"
             }
         }
     }
