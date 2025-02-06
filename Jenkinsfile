@@ -29,9 +29,9 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'dock-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         
                             sh "echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin"
-                        
                             def buildTag = "${env.BUILD_ID}"
-                            image.push("${buildTag}")
+                            def imageName = "${DOCKER_REGISTRY}/${DOCKER_REPO}:${buildTag}"
+                            sh "docker push ${imageName}"
                         }
                     }
                 }
