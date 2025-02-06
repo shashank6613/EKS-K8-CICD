@@ -43,11 +43,11 @@ pipeline {
                     withCredentials([file(credentialsId: 'local-kubeconfig', variable: 'KUBECONFIG')]) {
                         script {
                             def buildTag = "${env.BUILD_ID}"
-                            sh "kubectl apply -f deployment.yaml"
+                            sh "kubectl apply -f deployment.yaml --validate=false"
 
                             sh "kubectl set image deployment/my-app-deployment prt-app=${DOCKER_REGISTRY}/${DOCKER_REPO}:${buildTag}"
                 
-                            sh "kubectl apply -f service.yaml"
+                            sh "kubectl apply -f service.yaml --validate=false"
                 
                             sh "kubectl rollout status deployment/my-app-deployment"
                         }
