@@ -38,6 +38,7 @@ pipeline {
             }
 
             stage('Deploy to Local Kubernetes') {
+                agent { label 'k8-master' }
                 steps {
                     withCredentials([file(credentialsId: 'local-kubeconfig', variable: 'KUBECONFIG')]) {
                         script {
