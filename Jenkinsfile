@@ -117,7 +117,7 @@ pipeline {
                 script {
                     def buildTag = "${DOCKER_IMAGE_NAME}:${BUILD_ID}"  // Tagging with BUILD_ID
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIAL_ID}") {
-                    docker.image(buildTag).push('latest')  // Push with the BUILD_ID tag
+                    docker.image(buildTag).push()  // Push with the BUILD_ID tag
                     }
                 }
             }
