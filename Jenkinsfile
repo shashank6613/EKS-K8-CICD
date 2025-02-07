@@ -54,7 +54,7 @@ pipeline {
                 withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
                     script {
                         try {
-                            sh '''
+                            sh """
                                 # Create EKS Cluster
                                 eksctl create cluster \
                                     --name ${params.CLUSTER_NAME} \
@@ -66,7 +66,7 @@ pipeline {
                                     --nodes-min 1 \
                                     --nodes-max 1 \
                                     --managed
-                            '''
+                            """
                             env.CLUSTER_CREATED = 'true'
                         } catch (Exception e) {
                             echo "Cluster creation failed: ${e}"
