@@ -19,59 +19,61 @@ pipeline {
     }
 
     stages {
-        stage('Check Cluster') {
-            steps {
-                script {
-                    try {
-                        withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
-                            def clusterExists = sh(script: """
-                                #!/bin/bash
-                                eksctl get cluster --region ${params.AWS_REGION} --name ${params.CLUSTER_NAME} --output json || echo "Cluster not found"
-                            """, returnStdout: true, shell: '/bin/bash').trim()
-                            
-                            if (clusterExists.contains("Cluster not found")) {
-                                echo 'Cluster does not exist. Proceeding with creation.'
-                                env.CLUSTER_CREATED = 'false'
-                            } else {
-                                echo 'Cluster already exists. Skipping creation.'
-                                env.CLUSTER_CREATED = 'true'
+        stages {
+            stage('Check Cluster') {
+                steps {
+                    script {
+                        try {
+                            withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
+                                def clusterExists = sh(script: """
+                                    #!/bin/bash
+                                    eksctl get cluster --region ${params.AWS_REGION} --name ${params.CLUSTER_NAME} --output json
+                                """, returnStatus: true, shell: '/bin/bash')
+
+                                if (clusterExists != 0) {
+                                    echo 'Cluster does not exist. Proceeding with creation.'
+                                    env.CLUSTER_CREATED = 'false'
+                                } else {
+                                    echo 'Cluster already exists. Skipping creation.'
+                                    env.CLUSTER_CREATED = 'true'
+                                }
                             }
+                        } catch (Exception e) {
+                            echo "Cluster check failed: ${e}"
+                            env.CLUSTER_CREATED = 'false'
+                            currentBuild.result = 'FAILURE'
                         }
-                    } catch (Exception e) {
-                        echo "Cluster check failed: ${e}"
-                        env.CLUSTER_CREATED = 'false'
-                        currentBuild.result = 'FAILURE'
                     }
                 }
             }
-        }
 
-        stage('Create EKS Cluster') {
-            when {
-                expression { return env.CLUSTER_CREATED == 'false' }
-            }
-            steps {
-                withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
-                    script {
-                        try {
-                            sh '''
-                                # Create EKS Cluster
-                                eksctl create cluster \
-                                    --name ${params.CLUSTER_NAME} \
-                                    --version 1.30 \
-                                    --region ${params.AWS_REGION} \
-                                    --nodegroup-name standard-workers \
-                                    --node-type t3.medium \
-                                    --nodes 1 \
-                                    --nodes-min 1 \
-                                    --nodes-max 1 \
-                                    --managed
-                            '''
-                            env.CLUSTER_CREATED = 'true'
-                        } catch (Exception e) {
-                            echo "Cluster creation failed: ${e}"
-                            env.CLUSTER_CREATED = 'false'
-                            currentBuild.result = 'FAILURE'
+            stage('Create EKS Cluster') {
+                when {
+                    expression { return env.CLUSTER_CREATED == 'false' }
+                }
+                steps {
+                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
+                        script {
+                            try {
+                                sh '''
+                                    # Create EKS Cluster
+                                    eksctl create cluster \
+                                        --name ${params.CLUSTER_NAME} \
+                                        --version 1.30 \
+                                        --region ${params.AWS_REGION} \
+                                        --nodegroup-name standard-workers \
+                                        --node-type t3.medium \
+                                        --nodes 1 \
+                                        --nodes-min 1 \
+                                        --nodes-max 1 \
+                                        --managed
+                                '''
+                                env.CLUSTER_CREATED = 'true'
+                            } catch (Exception e) {
+                                echo "Cluster creation failed: ${e}"
+                                env.CLUSTER_CREATED = 'false'
+                                currentBuild.result = 'FAILURE'
+                            }
                         }
                     }
                 }
