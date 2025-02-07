@@ -131,9 +131,9 @@ pipeline {
                 withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
                     script {
                 // Update kubeconfig
-                        sh '''
+                        sh """
                             aws eks --region ${params.AWS_REGION} update-kubeconfig --name ${params.CLUSTER_NAME}
-                        '''
+                        """
                 // Use the Docker image tagged with BUILD_ID
                         def dockerImage = "${DOCKER_IMAGE_NAME}:${BUILD_ID}"
                         sh """
