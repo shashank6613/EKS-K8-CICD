@@ -26,7 +26,7 @@ pipeline {
                         withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
                             def clusterExists = sh(script: """
                                 #!/bin/bash
-                                eksctl get cluster --region ${params.AWS_REGION} --name ${params.CLUSTER_NAME} --output json || echo "Cluster not found'
+                                eksctl get cluster --region ${params.AWS_REGION} --name ${params.CLUSTER_NAME} --output json || echo "Cluster not found"
                             """, returnStdout: true, shell: '/bin/bash').trim()
                             
                             if (clusterExists.contains("Cluster not found")) {
