@@ -11,7 +11,7 @@ pipeline {
     environment {
         
         AWS_CREDENTIALS_ID = 'aws-creds'             // AWS Environment
-        DOCKER_IMAGE_NAME = 'shashank9928/my-app'    // Docker Environment
+        DOCKER_IMAGE_NAME = 'shashank9928/prt-app'    // Docker Environment
         DOCKER_CREDENTIAL_ID = 'dock-creds'
         GIT_CREDENTIALS_ID = 'git-creds'            // Git Environment
         KUBE_DEPLOYMENT_FILE = 'deployment.yaml'    // Kubernetes Files
@@ -83,7 +83,7 @@ pipeline {
             }
             steps {
                 git(
-                    url: 'https://github.com/shashank6613/ProjectCI-CD.git',
+                    url: 'https://github.com/shashank6613/Website-PRT-ORG',
                     branch: 'main',
                     credentialsId: "${GIT_CREDENTIALS_ID}"
                 )
