@@ -178,7 +178,7 @@ pipeline {
                             sh '''
                                 docker ps -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker stop
                                 docker ps -a -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker rm
-                                docker rmi ${DOCKER_IMAGE_NAME}:latest || true
+                                docker rmi ${DOCKER_IMAGE_NAME}:${BUILD_ID} || true
                             '''
                         }
                     }
