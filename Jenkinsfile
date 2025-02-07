@@ -163,28 +163,26 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed. Cleaning up resources if needed.'
-
-        // Check if Docker images or containers were created
-            def dockerResourcesCreated = false
+            script {
+                def dockerResourcesCreated = false
         
-        // Check if Docker image was built and pushed
-            if (env.DOCKER_IMAGE_CREATED == 'true') {
+                if (env.DOCKER_IMAGE_CREATED == 'true') {
                 dockerResourcesCreated = true
-            }
+                }
         
         // Clean up Docker images and containers if they were created
-            if (dockerResourcesCreated) {
-                echo 'Docker resources were created. Cleaning up Docker containers and images.'
-                withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
-                    script {
-                        sh '''
-                            docker ps -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker stop
-                            docker ps -a -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker rm
-                            docker rmi ${DOCKER_IMAGE_NAME}:latest || true
-                        '''
+                if (dockerResourcesCreated) {
+                    echo 'Docker resources were created. Cleaning up Docker containers and images.'
+                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
+                        script {
+                            sh '''
+                                docker ps -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker stop
+                                docker ps -a -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker rm
+                                docker rmi ${DOCKER_IMAGE_NAME}:latest || true
+                            '''
+                        }
                     }
                 }
             }
         }
     }
-}
