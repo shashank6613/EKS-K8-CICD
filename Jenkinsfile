@@ -45,15 +45,19 @@ pipeline {
                                         --nodes-max 1 \
                                         --managed
                                 """
+                                echo "Cluster created successfully!"
                                 env.CLUSTER_CREATED = 'true'
                             } else {
                                 echo 'Cluster already exists. Skipping creation.'
+                                env.CLUSTER_CREATED = 'true'
                             }
                         }
                     } catch (Exception e) {
                         echo "Cluster check/creation failed: ${e}"
                         currentBuild.result = 'FAILURE'
+                        env.CLUSTER_CREATED = 'false'
                     }
+                    echo "Cluster Created Status: ${env.CLUSTER_CREATED}"
                 }
             }
         }
