@@ -56,21 +56,18 @@ pipeline {
             }
         }
         stage('Checkout Source Code') {
+            when {
+                expression { return env.CLUSTER_CREATED == 'true' }  // Conditionally run this stage
+            }
             steps {
-                echo "Cluster Created Status: ${env.CLUSTER_CREATED}"
-                when {
-                    expression { return env.CLUSTER_CREATED == 'true' }
-                }
-                step {
-                    git(
-                        url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
-                        branch: 'main',
-                       credentialsId: "${GIT_CREDENTIALS_ID}"
-                    )
-                }    
+                echo "Cluster Created Status: ${env.CLUSTER_CREATED}"  // Debugging output
+                git(
+                    url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
+                    branch: 'main',
+                    credentialsId: "${GIT_CREDENTIALS_ID}"
+                )
             }
         }
-
         stage('Build Docker Image') {
             when {
                 expression { return env.CLUSTER_CREATED == 'true' }
