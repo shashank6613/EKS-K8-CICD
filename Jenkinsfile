@@ -142,7 +142,7 @@ pipeline {
     failure {
         echo 'Pipeline failed. Cleaning up resources if needed.'
 
-        step {
+        script {
             // Clean up Docker resources if created
             if (env.DOCKER_IMAGE_CREATED == 'true') {
                 echo 'Cleaning up Docker containers and images.'
