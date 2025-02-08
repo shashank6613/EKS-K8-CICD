@@ -56,16 +56,18 @@ pipeline {
             }
         }
         stage('Checkout Source Code') {
-            echo "Cluster Created Status: ${env.CLUSTER_CREATED}"
-            when {
-                expression { return env.CLUSTER_CREATED == 'true' }
-            }
             steps {
-                git(
-                    url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
-                    branch: 'main',
-                    credentialsId: "${GIT_CREDENTIALS_ID}"
-                )
+                echo "Cluster Created Status: ${env.CLUSTER_CREATED}"
+                when {
+                    expression { return env.CLUSTER_CREATED == 'true' }
+                }
+                step {
+                    git(
+                        url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
+                        branch: 'main',
+                       credentialsId: "${GIT_CREDENTIALS_ID}"
+                    )
+                }    
             }
         }
 
