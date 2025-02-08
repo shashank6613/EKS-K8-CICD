@@ -61,7 +61,7 @@ pipeline {
             }
             steps {
                 git(
-                    url: 'https://github.com/shashank6613/ProjectCI-CD.git',
+                    url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
                     branch: 'main',
                     credentialsId: "${GIT_CREDENTIALS_ID}"
                 )
