@@ -157,14 +157,15 @@ pipeline {
         }
 
         // Clean up EKS resources (deployment and service)
-        echo 'Cleaning up EKS resources if created.'
-        withAWS(credentials: "${params.AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
-            script {
-                sh '''
-                    kubectl delete deployment ${params.DEPLOYMENT_NAME} --ignore-not-found
-                    kubectl delete service ${params.SERVICE_NAME} --ignore-not-found
-                '''
+            echo 'Cleaning up EKS resources if created.'
+            withAWS(credentials: "${params.AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
+                script {
+                    sh '''
+                        kubectl delete deployment ${params.DEPLOYMENT_NAME} --ignore-not-found
+                        kubectl delete service ${params.SERVICE_NAME} --ignore-not-found
+                    '''
+                }
             }
         }
     }
-}
+}    
