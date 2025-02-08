@@ -56,11 +56,7 @@ pipeline {
             }
         }
         stage('Checkout Source Code') {
-            when {
-                expression { return env.CLUSTER_CREATED == 'true' }  // Conditionally run this stage
-            }
             steps {
-                echo "Cluster Created Status: ${env.CLUSTER_CREATED}"  // Debugging output
                 git(
                     url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
                     branch: 'main',
