@@ -44,6 +44,7 @@ pipeline {
                                         --nodes-max 1 \
                                         --managed
                                 """
+                                env.CLUSTER_CREATED = 'true'
                             } else {
                                 echo 'Cluster already exists. Skipping creation.'
                             }
@@ -56,6 +57,9 @@ pipeline {
             }
         }
         stage('Checkout Source Code') {
+            when {
+                expression { return env.CLUSTER_CREATED == 'true' }
+            }
             steps {
                 git(
                     url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
