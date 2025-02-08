@@ -32,7 +32,7 @@ pipeline {
 
                             if (clusterExists != 0) {
                                 echo 'Cluster does not exist. Creating cluster...'
-                                sh '''
+                                sh """
                                     eksctl create cluster \
                                         --name ${params.CLUSTER_NAME} \
                                         --version 1.30 \
@@ -43,7 +43,7 @@ pipeline {
                                         --nodes-min 1 \
                                         --nodes-max 1 \
                                         --managed
-                                '''
+                                """
                             } else {
                                 echo 'Cluster already exists. Skipping creation.'
                             }
