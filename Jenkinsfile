@@ -142,30 +142,32 @@ pipeline {
     failure {
         echo 'Pipeline failed. Cleaning up resources if needed.'
 
-        // Clean up Docker resources if created
-        if (env.DOCKER_IMAGE_CREATED == 'true') {
-            echo 'Cleaning up Docker containers and images.'
-            withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
-                script {
-                    sh '''
-                        docker ps -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker stop
-                        docker ps -a -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker rm
-                        docker rmi ${DOCKER_IMAGE_NAME}:latest || true
-                    '''
+        step {
+            // Clean up Docker resources if created
+            if (env.DOCKER_IMAGE_CREATED == 'true') {
+                echo 'Cleaning up Docker containers and images.'
+                withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
+                    script {
+                        sh '''
+                            docker ps -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker stop
+                            docker ps -a -q --filter "ancestor=${DOCKER_IMAGE_NAME}:latest" | xargs -r docker rm
+                            docker rmi ${DOCKER_IMAGE_NAME}:latest || true
+                        '''
+                    }
                 }
             }
-        }
 
-        // Clean up EKS resources (deployment and service)
-            echo 'Cleaning up EKS resources if created.'
-            withAWS(credentials: "${params.AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
-                script {
-                    sh '''
-                        kubectl delete deployment ${params.DEPLOYMENT_NAME} --ignore-not-found
-                        kubectl delete service ${params.SERVICE_NAME} --ignore-not-found
-                    '''
+            // Clean up EKS resources (deployment and service)
+                echo 'Cleaning up EKS resources if created.'
+                withAWS(credentials: "${params.AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
+                    script {
+                        sh '''
+                            kubectl delete deployment ${params.DEPLOYMENT_NAME} --ignore-not-found
+                            kubectl delete service ${params.SERVICE_NAME} --ignore-not-found
+                        '''
+                    }
                 }
             }
         }
-    }
+    }    
 }    
