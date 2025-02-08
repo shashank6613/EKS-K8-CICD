@@ -11,6 +11,7 @@ pipeline {
     }
 
     environment {
+        CLUSTER_CREATED = 'false'
         
         AWS_CREDENTIALS_ID = 'aws-creds'             // AWS Environment
         DOCKER_IMAGE_NAME = 'shashank9928/my-app'    // Docker Environment
@@ -61,6 +62,7 @@ pipeline {
                 expression { return env.CLUSTER_CREATED == 'true' }
             }
             steps {
+                echo "Cluster Created Status: ${env.CLUSTER_CREATED}"
                 git(
                     url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
                     branch: 'main',
