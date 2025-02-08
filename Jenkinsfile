@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     parameters {
-        // Parameters for EKS Cluster
         string(name: 'DEPLOYMENT_NAME', defaultValue: 'my-deployment', description: 'Name of K8s Deployment')
         string(name: 'SERVICE_NAME', defaultValue: 'my-service', description: 'Name of K8s Service')
         string(name: 'CLUSTER_NAME', defaultValue: 'my-cluster', description: 'Name of the EKS cluster.')
@@ -12,12 +11,11 @@ pipeline {
 
     environment {
         CLUSTER_CREATED = 'false'
-        
-        AWS_CREDENTIALS_ID = 'aws-creds'             // AWS Environment
-        DOCKER_IMAGE_NAME = 'shashank9928/my-app'    // Docker Environment
+        AWS_CREDENTIALS_ID = 'aws-creds' 
+        DOCKER_IMAGE_NAME = 'shashank9928/prt-app'
         DOCKER_CREDENTIAL_ID = 'dock-creds'
-        GIT_CREDENTIALS_ID = 'git-creds'            // Git Environment
-        KUBE_DEPLOYMENT_FILE = 'deployment.yaml'    // Kubernetes Files
+        GIT_CREDENTIALS_ID = 'git-creds'
+        KUBE_DEPLOYMENT_FILE = 'deployment.yaml'
         KUBE_SERVICE_FILE = 'service.yaml'
     }
 
@@ -46,27 +44,29 @@ pipeline {
                                         --managed
                                 """
                                 echo "Cluster created successfully!"
-                                env.CLUSTER_CREATED = 'true'
+                                currentBuild.description = 'Cluster Created'
                             } else {
                                 echo 'Cluster already exists. Skipping creation.'
-                                env.CLUSTER_CREATED = 'true'
+                                currentBuild.description = 'Cluster Exists'
                             }
                         }
                     } catch (Exception e) {
                         echo "Cluster check/creation failed: ${e}"
                         currentBuild.result = 'FAILURE'
-                        env.CLUSTER_CREATED = 'false'
+                        currentBuild.description = 'Cluster Creation Failed'
                     }
-                    echo "Cluster Created Status: ${env.CLUSTER_CREATED}"
+                    // Debugging output to check the value of currentBuild.description
+                    echo "Cluster Created Status: ${currentBuild.description}"
                 }
             }
         }
+
         stage('Checkout Source Code') {
             when {
-                expression { return env.CLUSTER_CREATED == 'true' }
+                expression { return currentBuild.description == 'Cluster Created' || currentBuild.description == 'Cluster Exists' }
             }
             steps {
-                echo "Cluster Created Status: ${env.CLUSTER_CREATED}"
+                echo "Cluster Created Status: ${currentBuild.description}"
                 git(
                     url: 'https://github.com/shashank6613/Website-PRT-ORG.git',
                     branch: 'main',
@@ -74,9 +74,10 @@ pipeline {
                 )
             }
         }
+
         stage('Build Docker Image') {
             when {
-                expression { return env.CLUSTER_CREATED == 'true' }
+                expression { return currentBuild.description == 'Cluster Created' || currentBuild.description == 'Cluster Exists' }
             }
             steps {
                 script {
@@ -95,7 +96,7 @@ pipeline {
 
         stage('Push Docker Image') {
             when {
-                expression { return env.CLUSTER_CREATED == 'true' }
+                expression { return currentBuild.description == 'Cluster Created' || currentBuild.description == 'Cluster Exists' }
             }
             steps {
                 script {
@@ -109,7 +110,7 @@ pipeline {
 
         stage('Update kubeconfig') {
             when {
-                expression { return env.CLUSTER_CREATED == 'true' }
+                expression { return currentBuild.description == 'Cluster Created' || currentBuild.description == 'Cluster Exists' }
             }
             steps {
                 withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${params.AWS_REGION}") {
@@ -130,7 +131,7 @@ pipeline {
 
         stage('Deploy to EKS') {
             when {
-                expression { return env.CLUSTER_CREATED == 'true' }
+                expression { return currentBuild.description == 'Cluster Created' || currentBuild.description == 'Cluster Exists' }
             }
             steps {
                 script {
@@ -176,4 +177,4 @@ pipeline {
             }
         }
     }    
-}    
+}
