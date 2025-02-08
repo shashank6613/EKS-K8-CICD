@@ -135,8 +135,10 @@ pipeline {
             }
             steps {
                 script {
-                    sh "kubectl apply -f ${KUBE_SERVICE_FILE}"
-                    sh "kubectl apply -f ${KUBE_DEPLOYMENT_FILE}"
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        sh "kubectl apply -f ${KUBE_SERVICE_FILE}"
+                        sh "kubectl apply -f ${KUBE_DEPLOYMENT_FILE}"
+                    }    
                 }
             }
         }
