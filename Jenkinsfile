@@ -30,7 +30,7 @@ pipeline {
                                 eksctl get cluster --region ${params.AWS_REGION} --name ${params.CLUSTER_NAME} --output json
                             """, returnStatus: true, shell: '/bin/bash')
 
-                            if (!clusterExists) {
+                            if (clusterExists != 0) {
                                 echo 'Cluster does not exist. Creating cluster...'
                                 sh '''
                                     eksctl create cluster \
