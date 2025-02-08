@@ -56,6 +56,7 @@ pipeline {
             }
         }
         stage('Checkout Source Code') {
+            echo "Cluster Created Status: ${env.CLUSTER_CREATED}"
             when {
                 expression { return env.CLUSTER_CREATED == 'true' }
             }
